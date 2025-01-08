@@ -12,7 +12,7 @@ def input_error(func):
         except IndexError:
             return 'Enter the arguments'
         except AttributeError:
-            return 'Contact not found'
+            return 'Contact does not exist or birthday is not defined'
 
     return inner
 
