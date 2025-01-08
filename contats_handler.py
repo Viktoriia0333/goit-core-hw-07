@@ -65,7 +65,6 @@ def show_birthday(args, book):
     return record.birthday.value
 
 
-@input_error
 def birthdays(book: AddressBook):
     return book.get_upcoming_birthdays()
 

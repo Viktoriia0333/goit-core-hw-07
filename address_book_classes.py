@@ -1,5 +1,5 @@
-from collections import UserDict
 from datetime import datetime, timedelta
+from collections import UserDict
 
 
 class Field:
@@ -11,15 +11,13 @@ class Field:
 
 
 class Birthday(Field):
-    def __init__(self, value):
+    def __init__(self, value: str):
         super().__init__(self)
         try:
-            self.value = datetime.strptime(value, '%d.%m.%Y').date()
+            datetime.strptime(value, '%d.%m.%Y')
+            self.value = value
         except ValueError:
-            print("Invalid date format. Use DD.MM.YYYY")
-
-    def __sub__(self, other):
-        return self.value - other.value
+            raise ValueError("Invalid date format. Use DD.MM.YYYY")
 
     def __str__(self):
         super().__str__()
@@ -39,10 +37,10 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name, birthday: Birthday = None):
+    def __init__(self, name):
         self.name = Name(name)
         self.phones = []
-        self.birthday = birthday
+        self.birthday = None
 
     def add_phone(self, phone):
         if phone not in [p.value for p in self.phones]:
@@ -73,8 +71,9 @@ class Record:
         self.birthday = Birthday(birthday)
 
     def __str__(self):
-        return (f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: "
-                f"{self.birthday}")
+        phones = '; '.join(p.value for p in self.phones)
+        birthday = f", birthday: {self.birthday.value}" if self.birthday else ""
+        return f"Contact name: {self.name.value}, phones: {phones}{birthday}"
 
     def __repr__(self):
         return str(self)
@@ -90,13 +89,24 @@ class AddressBook(UserDict):
     def delete(self, name):
         self.data.pop(name) if name in self.data else None
 
+    @staticmethod
+    def find_next_monday(date, weekday=0):
+        time_delta = timedelta(days=weekday - date.weekday())
+        monday = date + time_delta + timedelta(days=7)
+        return monday
+
     def get_upcoming_birthdays(self):
         current_date = datetime.now().date()
         birthdays = []
+
         for record in self.data.values():
-            record.birthday.value = record.birthday.value.replace(year=current_date.year)
-            if (record.birthday.value - current_date) <= timedelta(days=7):
-                birthdays.append({'name': record.name.value, 'birthday': record.birthday.value})
+            if record.birthday:
+                birthday_date = datetime.strptime(record.birthday.value, '%d.%m.%Y').date()
+                birthday_date = birthday_date.replace(year=current_date.year)
+                if (birthday_date - current_date) <= timedelta(days=7):
+                    if birthday_date.weekday() >= 5:
+                        birthday_date = self.find_next_monday(birthday_date)
+                    birthdays.append({'name': record.name.value, 'to congratulate': str(birthday_date)})
         return birthdays
 
     def __str__(self):

@@ -1,11 +1,14 @@
 from address_book_classes import *
 from contats_handler import *
+a = Record("a")
+a.add_phone('0365986565')
+a.add_birthday('10.01.2000')
+book = AddressBook()
+book.add_record(a)
+print(type(a.birthday))
+print(book)
+print(book.get_upcoming_birthdays())
 
-nik = Record('Nik')
-nik.add_phone('3809564523')
-print(nik.edit_phone('3809564523', '3806954563'))
-print(nik.edit_phone('3806954563', '3806956423'))
-print(nik)
 
 def parse_command(user_input):
     cmd, *args = user_input.split()
